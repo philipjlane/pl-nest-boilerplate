@@ -6,7 +6,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as MongoDBStore from 'connect-mongodb-session';
 import { ConfigService } from '@nestjs/config';
-import { UserDocument } from './users/entities/user.entity';
+import helmet from 'helmet';
 
 // const MongoDBStore = require('connect-mongodb-session')(session);
 
@@ -17,6 +17,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const isProductionEnvironment =
     configService.getOrThrow<string>('NODE_ENV') === 'production';
+
+  // Security
+  app.use(helmet());
 
   // AUTO DTO Validation
   app.useGlobalPipes(new ValidationPipe());
@@ -47,18 +50,6 @@ async function bootstrap() {
   // Passport
   app.use(passport.initialize());
   app.use(passport.session());
-  // passport.serializeUser((user: UserDocument, cb) => {
-  //   const { password, ...result } = user;
-
-  //   console.log(45, result);
-
-  //   return cb(null, user);
-  // });
-
-  // passport.deserializeUser((user, cb) => {
-  //   console.log(50, user);
-  //   return cb(null, user);
-  // });
 
   // Start HTTP Server
   await app.listen(configService.getOrThrow<string>('PORT'));

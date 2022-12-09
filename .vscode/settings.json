@@ -1,4 +1,5 @@
 {
   "typescript.implementationsCodeLens.enabled": false,
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "cSpell.words": ["Throttler"]
 }

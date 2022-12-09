@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { HttpSessionGuard } from './auth/guards/http-session.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { APP_GUARD } from '@nestjs/core';
         MONGO_URI: Joi.string().required(),
       }),
     }),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
+    }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
@@ -35,6 +40,11 @@ import { APP_GUARD } from '@nestjs/core';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      // Throttle requests
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       // Protect all routes with Http Session Guard by default
       provide: APP_GUARD,
