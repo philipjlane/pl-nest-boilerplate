@@ -1,0 +1,4 @@
+{
+  "typescript.implementationsCodeLens.enabled": false,
+  "typescript.preferences.importModuleSpecifier": "relative"
+}

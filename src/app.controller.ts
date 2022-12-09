@@ -1,12 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import {
+  Controller,
+  Request,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import MongooseClassSerializerInterceptor from './!common/interceptors/mongooseClassSerializer.interceptor';
+import { LocalAuthGuard } from './auth/guards/local-auth.guard';
+import { User } from './users/entities/user.entity';
 
+@UseInterceptors(MongooseClassSerializerInterceptor(User))
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @UseGuards(LocalAuthGuard)
+  @Post('auth/login')
+  async login(@Request() req) {
+    return req.user;
   }
 }
