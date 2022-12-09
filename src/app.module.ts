@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { HttpSessionGuard } from './auth/guards/http-session.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -31,6 +33,13 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      // Protect all routes with Http Session Guard by default
+      provide: APP_GUARD,
+      useClass: HttpSessionGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -4,7 +4,7 @@ import { Role } from '../../auth/enums/role.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, strict: true, strictQuery: false })
 export class User {
   // @Transform(({ value }) => value.toString()) //for the class
   // _id: string;

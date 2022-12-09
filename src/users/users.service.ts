@@ -6,6 +6,7 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { Role } from '../auth/enums/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,6 @@ export class UsersService {
     private userModel: PaginateModel<UserDocument>,
   ) {}
   async create(createUserDto: CreateUserDto) {
-    // console.log(createUserDto);
     return await this.userModel.create(createUserDto);
   }
 
@@ -26,6 +26,7 @@ export class UsersService {
     newUser.givenName = registerUserDto.givenName;
     newUser.familyName = registerUserDto.familyName;
     newUser.password = hashedPassword;
+    newUser.role = Role.Subscriber;
 
     // TODO handle duplicate email addresses
     await newUser.save();
@@ -50,10 +51,11 @@ export class UsersService {
       : this.userModel.findOne({ email });
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto);
-
-    return `This action updates a #${id} user`;
+  async update(_id: string, updateUserDto: UpdateUserDto) {
+    return this.userModel.findOneAndUpdate({ _id }, updateUserDto, {
+      new: true,
+      runValidators: true,
+    });
   }
 
   remove(id: string) {
