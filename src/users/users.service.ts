@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { PaginateModel } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,7 +9,10 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name)
+    private userModel: PaginateModel<UserDocument>,
+  ) {}
   async create(createUserDto: CreateUserDto) {
     // console.log(createUserDto);
     return await this.userModel.create(createUserDto);
@@ -31,15 +34,20 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.userModel.find();
+    return await this.userModel.paginate();
   }
 
   async findOne(id: string): Promise<UserDocument> {
     return this.userModel.findById(id);
   }
 
-  async findOneByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email });
+  async findOneByEmail(
+    email: string,
+    withPassword?: boolean,
+  ): Promise<UserDocument> {
+    return withPassword
+      ? this.userModel.findOne({ email }).select('+password')
+      : this.userModel.findOne({ email });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
