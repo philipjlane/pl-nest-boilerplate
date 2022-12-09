@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude, Transform } from 'class-transformer';
 import { HydratedDocument } from 'mongoose';
+import { Role } from '../../auth/enums/role.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Transform(({ value }) => value.toString())
-  _id: string;
+  // @Transform(({ value }) => value.toString()) //for the class
+  // _id: string;
 
   @Prop()
   givenName: string;
@@ -18,9 +18,11 @@ export class User {
   @Prop({ unique: true })
   email: string;
 
-  @Prop()
-  @Exclude()
+  @Prop({ select: false }) //exclude from results by default. add back in with query.select('+password')
   password: string;
+
+  @Prop()
+  role: Role;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
