@@ -7,9 +7,6 @@ import * as passport from 'passport';
 import * as MongoDBStore from 'connect-mongodb-session';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
-
-// const MongoDBStore = require('connect-mongodb-session')(session);
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
@@ -28,6 +25,10 @@ async function bootstrap() {
   app.use(cookieParser(configService.getOrThrow<string>('SESSION_SECRET')));
 
   // Sessions
+
+  // Passport
+  app.use(passport.initialize());
+
   const mongoStore = MongoDBStore(session);
   const store = new mongoStore({
     uri: configService.getOrThrow<string>('MONGO_URI'),
@@ -46,9 +47,6 @@ async function bootstrap() {
       store: store,
     }),
   );
-
-  // Passport
-  app.use(passport.initialize());
   app.use(passport.session());
 
   // Start HTTP Server

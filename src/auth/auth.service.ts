@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../users/entities/user.entity';
+import { RegisterLinkedInUserDto } from '../users/dto/register-linkedin-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,5 +17,32 @@ export class AuthService {
       return user;
     }
     return null;
+  }
+
+  async findOrCreateLinkedinUser(
+    registerLinkedInUserDto: RegisterLinkedInUserDto,
+  ): Promise<UserDocument> {
+    const user = await this.usersService.findOneByEmail(
+      registerLinkedInUserDto.email,
+    );
+
+    if (user) {
+      return user;
+    }
+
+    const { givenName, familyName, email, id } = registerLinkedInUserDto;
+    const oAuthObj = {
+      provider: 'linkedin', //TODO Extract magic string to constant
+      id,
+    };
+
+    const newUser = await this.usersService.create({
+      givenName,
+      familyName,
+      email,
+      oAuth: oAuthObj,
+    });
+
+    return newUser;
   }
 }

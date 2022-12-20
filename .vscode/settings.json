@@ -1,5 +1,5 @@
 {
   "typescript.implementationsCodeLens.enabled": false,
   "typescript.preferences.importModuleSpecifier": "relative",
-  "cSpell.words": ["Throttler"]
+  "cSpell.words": ["emailaddress", "liteprofile", "Throttler"]
 }
