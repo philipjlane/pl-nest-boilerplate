@@ -4,6 +4,11 @@ import { Role } from '../../auth/enums/role.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
+export type OAuthProviderRecord = {
+  provider: string;
+  id: string;
+};
+
 @Schema({ timestamps: true, strict: true, strictQuery: false })
 export class User {
   // @Transform(({ value }) => value.toString()) //for the class
@@ -23,6 +28,14 @@ export class User {
 
   @Prop()
   role: Role;
+
+  @Prop([
+    {
+      provider: String,
+      id: String,
+    },
+  ])
+  oAuth: OAuthProviderRecord[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

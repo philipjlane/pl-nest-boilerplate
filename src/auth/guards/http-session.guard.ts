@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 export const AllowUnauthorizedRequest = () =>
   SetMetadata('allowUnauthorizedRequest', true);
@@ -17,7 +18,7 @@ export class HttpSessionGuard extends AuthGuard('local') {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -26,7 +27,7 @@ export class HttpSessionGuard extends AuthGuard('local') {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
 
     // If user is logged in
     if (request.isAuthenticated()) return true;
