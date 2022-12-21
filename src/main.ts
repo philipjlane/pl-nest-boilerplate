@@ -18,8 +18,6 @@ async function bootstrap() {
   // Security
   app.use(helmet());
 
-  console.log(configService.getOrThrow<string>('CLIENT_URL'));
-
   // CORS
   app.enableCors({
     credentials: true,
