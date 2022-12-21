@@ -1,4 +1,9 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginateModel } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -34,16 +39,24 @@ export class UsersService {
     newUser.role = Role.Subscriber;
     newUser.termsAccepted = registerUserDto.termsAccepted;
 
-    // TODO handle duplicate email addresses
-    await newUser.save();
+    try {
+      await newUser.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new BadRequestException('Email is already registered');
+      } else {
+        throw error;
+      }
+    }
 
     // TODO create session and return cookie
-    // TODO send welcome/verify email
+    // send welcome/verify email
     this.emailService.sendEmail({
       From: 'no-reply@elaitch.dev',
       Subject: 'Welcome to the app',
       To: registerUserDto.email,
-      TextBody: 'Welcome to the app. Lorem Ipsum',
+      TextBody:
+        'Welcome to the app. Follow the link to verify your email address.',
       HtmlBody: '<p>Welcome to the app. Lorem Ipsum</p>',
     });
     return newUser;
@@ -61,7 +74,7 @@ export class UsersService {
     // Store token with expiry in DB
     await user.save();
     // Send reset email to user with link
-    // TODO get from env
+    // TODO Centralise email templates
     this.emailService.sendEmail({
       From: 'no-reply@elaitch.dev',
       To: email,

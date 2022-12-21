@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from '../users/entities/user.entity';
 import { RegisterLinkedInUserDto } from '../users/dto/register-linkedin-user.dto';
+import { OAuthProviders } from './enums/oauth-providers.enum';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,7 @@ export class AuthService {
 
     const { givenName, familyName, email, id } = registerLinkedInUserDto;
     const oAuthObj = {
-      provider: 'linkedin', //TODO Extract magic string to constant
+      provider: OAuthProviders.LinkedIn,
       id,
     };
 

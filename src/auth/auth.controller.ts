@@ -4,11 +4,13 @@ import {
   Post,
   UseGuards,
   Get,
-  Redirect,
   HttpCode,
   Query,
   Body,
+  Response,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Response as ExpressResponse } from 'express';
 import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { UsersService } from '../users/users.service';
 import { Public } from './decorators/public.decorator';
@@ -17,7 +19,10 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private configService: ConfigService,
+    private userService: UsersService,
+  ) {}
   // Local Login
   @UseGuards(LocalAuthGuard)
   @Public()
@@ -39,9 +44,12 @@ export class AuthController {
   @Public()
   @UseGuards(LinkedInAuthGuard)
   @Get('linkedin/callback')
-  @Redirect('http://localhost:9000/home', 301) //TODO Make this a sensible client side target from env
-  linkedInAuthCallback() {
-    return;
+  // @Redirect(`${this.configService.getOrThrow<string>('CLIENT_URL')}/home`, 301)
+  linkedInAuthCallback(@Response() res: ExpressResponse) {
+    return res.redirect(
+      301,
+      `${this.configService.getOrThrow<string>('CLIENT_URL')}/home`,
+    );
   }
 
   // Auth Check
