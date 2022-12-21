@@ -8,7 +8,9 @@ import * as MongoDBStore from 'connect-mongodb-session';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, {
+    cors: { credentials: true, origin: ['http://localhost:9000'] }, //TODO get value from config service
+  });
 
   // Config
   const configService = app.get(ConfigService);

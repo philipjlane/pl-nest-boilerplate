@@ -1,4 +1,5 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsEmail, IsString, MinLength } from 'class-validator';
 
 export class RegisterUserDto {
   @IsString()
@@ -14,4 +15,8 @@ export class RegisterUserDto {
 
   @IsEmail()
   email: string;
+
+  @IsDate()
+  @Type(() => Date)
+  termsAccepted: Date;
 }

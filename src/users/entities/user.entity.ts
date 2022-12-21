@@ -9,6 +9,11 @@ export type OAuthProviderRecord = {
   id: string;
 };
 
+export type ResetToken = {
+  token: string;
+  expires: Date;
+};
+
 @Schema({ timestamps: true, strict: true, strictQuery: false })
 export class User {
   // @Transform(({ value }) => value.toString()) //for the class
@@ -27,6 +32,9 @@ export class User {
   password: string;
 
   @Prop()
+  termsAccepted: Date;
+
+  @Prop()
   role: Role;
 
   @Prop([
@@ -36,6 +44,17 @@ export class User {
     },
   ])
   oAuth: OAuthProviderRecord[];
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop({
+    type: {
+      token: String,
+      expires: Date,
+    },
+  })
+  resetToken?: ResetToken;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
