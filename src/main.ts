@@ -21,16 +21,19 @@ async function bootstrap() {
   app.use(helmet());
 
   // AUTO DTO Validation
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, //Strip unexpected props from DTOs
+    }),
+  );
 
   // Parse Cookies
   app.use(cookieParser(configService.getOrThrow<string>('SESSION_SECRET')));
 
-  // Sessions
-
   // Passport
   app.use(passport.initialize());
 
+  // Sessions
   const mongoStore = MongoDBStore(session);
   const store = new mongoStore({
     uri: configService.getOrThrow<string>('MONGO_URI'),

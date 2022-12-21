@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginateModel } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -8,8 +8,9 @@ import { User, UserDocument } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../auth/enums/role.enum';
 import { randomUUID } from 'crypto';
-import { addDays } from 'date-fns';
+import { addDays, compareAsc } from 'date-fns';
 import { EmailService } from '../email/email.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,7 @@ export class UsersService {
   }
 
   async register(registerUserDto: RegisterUserDto): Promise<UserDocument> {
-    const hashedPassword = await bcrypt.hash(registerUserDto.password, 10);
+    const hashedPassword = await this.getPasswordHash(registerUserDto.password);
 
     const newUser = new this.userModel();
     newUser.email = registerUserDto.email;
@@ -48,7 +49,7 @@ export class UsersService {
     return newUser;
   }
 
-  async resetPassword(email: string) {
+  async sendResetPasswordToken(email: string) {
     // find user
     const user = await this.findOneByEmail(email);
     // Create reset token
@@ -62,13 +63,36 @@ export class UsersService {
     // Send reset email to user with link
     // TODO get from env
     this.emailService.sendEmail({
-      From: 'info@elaitch.dev',
-      To: 'info@elaitch.dev',
-      Subject: 'Hello from Postmark',
-      HtmlBody: '<strong>Hello</strong> dear Postmark user.',
-      TextBody: 'Hello from Postmark!',
+      From: 'no-reply@elaitch.dev',
+      To: email,
+      Subject: 'Request to reset password',
+      HtmlBody: `<p>You have requested a password reset.</p>
+      <p>Please click the link below to complete the process. The link is only valid for 24 hours.</p>
+      <p><a href="http://localhost:9000/reset-password/confirm?token=${resetToken}">Click Here</a></p>`,
+      TextBody: `You have requested a password reset.\n
+      Please click the link below to complete the process. The link is only valid for 24 hours.\n
+      http://localhost:9000/reset-password/confirm?token=${resetToken}`,
       MessageStream: 'outbound',
     });
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    // find user and validate token
+    const user = await this.checkToken(resetPasswordDto.token);
+
+    // Update password
+    // Invalidate/remove reset token
+    const hashedPassword = await this.getPasswordHash(
+      resetPasswordDto.password,
+    );
+    return await this.userModel.findByIdAndUpdate(
+      user._id,
+      {
+        password: hashedPassword,
+        resetToken: null,
+      },
+      { new: true },
+    );
   }
 
   async findAll() {
@@ -97,5 +121,24 @@ export class UsersService {
 
   remove(id: string) {
     return `This action removes a #${id} user`;
+  }
+
+  async checkToken(token) {
+    const user = await this.userModel
+      .findOne({
+        'resetToken.token': token,
+      })
+      .select(['resetToken']);
+
+    if (!user) throw new NotFoundException();
+
+    if (compareAsc(new Date(user.resetToken.expires), new Date()) !== 1)
+      throw new HttpException('Token has expired', 498);
+
+    return user;
+  }
+
+  private async getPasswordHash(password: string) {
+    return await bcrypt.hash(password, 10);
   }
 }

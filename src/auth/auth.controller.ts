@@ -7,7 +7,9 @@ import {
   Redirect,
   HttpCode,
   Query,
+  Body,
 } from '@nestjs/common';
+import { ResetPasswordDto } from '../users/dto/reset-password.dto';
 import { UsersService } from '../users/users.service';
 import { Public } from './decorators/public.decorator';
 import { LinkedInAuthGuard } from './guards/linkedin-auth.guard';
@@ -61,7 +63,21 @@ export class AuthController {
   @Public()
   @Get('reset-password')
   @HttpCode(204)
-  async resetPassword(@Query('email') email) {
-    return this.userService.resetPassword(email);
+  async sendResetPasswordToken(@Query('email') email) {
+    return this.userService.sendResetPasswordToken(email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(204)
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.userService.resetPassword(resetPasswordDto);
+  }
+
+  // Check password reset token
+  @Public()
+  @Get('check-token')
+  async checkResetPasswordToken(@Query('token') token) {
+    return this.userService.checkToken(token);
   }
 }
