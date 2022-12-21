@@ -1,20 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import { UserDocument } from '../users/entities/user.entity';
+import { User, UserDocument } from '../users/entities/user.entity';
 import { RegisterLinkedInUserDto } from '../users/dto/register-linkedin-user.dto';
+import { OAuthProviders } from './enums/oauth-providers.enum';
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService) {}
 
-  async validateUser(email: string, password: string): Promise<UserDocument> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Omit<User, 'password'>> {
     const user = await this.usersService.findOneByEmail(email, true);
 
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (user && validPassword) {
-      return user;
+      const { password, ...result } = user.toObject();
+      return result;
     }
     return null;
   }
@@ -32,7 +37,7 @@ export class AuthService {
 
     const { givenName, familyName, email, id } = registerLinkedInUserDto;
     const oAuthObj = {
-      provider: 'linkedin', //TODO Extract magic string to constant
+      provider: OAuthProviders.LinkedIn,
       id,
     };
 

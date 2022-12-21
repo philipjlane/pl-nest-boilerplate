@@ -4,6 +4,7 @@ import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './entities/user.entity';
 import * as paginate from 'mongoose-paginate-v2';
+import { EmailService } from '../email/email.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import * as paginate from 'mongoose-paginate-v2';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, EmailService],
   exports: [UsersService, MongooseModule],
 })
 export class UsersModule {}

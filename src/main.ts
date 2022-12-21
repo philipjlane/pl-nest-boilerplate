@@ -8,7 +8,7 @@ import * as MongoDBStore from 'connect-mongodb-session';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
 
   // Config
   const configService = app.get(ConfigService);
@@ -18,17 +18,28 @@ async function bootstrap() {
   // Security
   app.use(helmet());
 
+  console.log(configService.getOrThrow<string>('CLIENT_URL'));
+
+  // CORS
+  app.enableCors({
+    credentials: true,
+    origin: configService.getOrThrow<string>('CLIENT_URL'),
+  });
+
   // AUTO DTO Validation
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, //Strip unexpected props from DTOs
+    }),
+  );
 
   // Parse Cookies
   app.use(cookieParser(configService.getOrThrow<string>('SESSION_SECRET')));
 
-  // Sessions
-
   // Passport
   app.use(passport.initialize());
 
+  // Sessions
   const mongoStore = MongoDBStore(session);
   const store = new mongoStore({
     uri: configService.getOrThrow<string>('MONGO_URI'),

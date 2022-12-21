@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { HttpSessionGuard } from './auth/guards/http-session.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { EmailService } from './email/email.service';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       provide: APP_GUARD,
       useClass: HttpSessionGuard,
     },
+    EmailService,
   ],
 })
 export class AppModule {}

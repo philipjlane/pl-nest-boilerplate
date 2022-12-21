@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build development stage from our dockerfile
+      target: development
+    volumes:
+      - /usr/src/app
+      - /home/node/app/node_modules
+    env_file:
+      - .env.development.local
+    # Run a command against the development stage of the image
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+    networks:
+      - server-network
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports: 
+      - '27017:27017'
+    networks:
+      - server-network
+networks:
+  server-network:

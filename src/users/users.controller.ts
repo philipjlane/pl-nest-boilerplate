@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,8 +25,12 @@ export class UsersController {
 
   @Public()
   @Post('register')
-  register(@Body() registerUserDto: RegisterUserDto) {
-    return this.usersService.register(registerUserDto);
+  async register(@Body() registerUserDto: RegisterUserDto, @Req() req: any) {
+    const newUser = await this.usersService.register(registerUserDto);
+    await req.login(newUser, (err) => {
+      if (err) throw err;
+    });
+    return newUser;
   }
 
   @Get()
