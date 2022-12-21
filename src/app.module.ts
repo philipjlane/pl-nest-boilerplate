@@ -31,18 +31,18 @@ import { EmailService } from './email/email.service';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_URI'),
-        ssl:
-          configService.get<string>('NODE_ENV') === 'production'
-            ? true
-            : undefined,
-        sslValidate:
-          configService.get<string>('NODE_ENV') === 'production'
-            ? true
-            : undefined,
-        sslCA:
-          configService.get<string>('NODE_ENV') === 'production'
-            ? `${__dirname}/root/dbaas_ca_cert.crt`
-            : undefined,
+        // ssl:
+        //   configService.get<string>('NODE_ENV') === 'production'
+        //     ? true
+        //     : undefined,
+        // sslValidate:
+        //   configService.get<string>('NODE_ENV') === 'production'
+        //     ? true
+        //     : undefined,
+        // sslCA:
+        //   configService.get<string>('NODE_ENV') === 'production'
+        //     ? `${__dirname}/root/dbaas_ca_cert.crt`
+        //     : undefined,
       }),
     }),
     UsersModule,
