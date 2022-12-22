@@ -16,6 +16,7 @@ import { randomUUID } from 'crypto';
 import { addDays, compareAsc } from 'date-fns';
 import { EmailService } from '../email/email.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,7 @@ export class UsersService {
     @InjectModel(User.name)
     private userModel: PaginateModel<UserDocument>,
     private emailService: EmailService,
+    private configService: ConfigService,
   ) {}
   async create(createUserDto: CreateUserDto) {
     return await this.userModel.create(createUserDto);
@@ -81,10 +83,14 @@ export class UsersService {
       Subject: 'Request to reset password',
       HtmlBody: `<p>You have requested a password reset.</p>
       <p>Please click the link below to complete the process. The link is only valid for 24 hours.</p>
-      <p><a href="http://localhost:9000/reset-password/confirm?token=${resetToken}">Click Here</a></p>`,
+      <p><a href="${this.configService.get<string>(
+        'CLIENT_URL',
+      )}/reset-password/confirm?token=${resetToken}">Click Here</a></p>`,
       TextBody: `You have requested a password reset.\n
       Please click the link below to complete the process. The link is only valid for 24 hours.\n
-      http://localhost:9000/reset-password/confirm?token=${resetToken}`,
+      ${this.configService.get<string>(
+        'CLIENT_URL',
+      )}/reset-password/confirm?token=${resetToken}`,
       MessageStream: 'outbound',
     });
   }
