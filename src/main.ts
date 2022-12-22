@@ -7,8 +7,9 @@ import * as passport from 'passport';
 import * as MongoDBStore from 'connect-mongodb-session';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Config
   const configService = app.get(ConfigService);
@@ -17,6 +18,10 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
+
+  if (isProductionEnvironment) {
+    app.set('trust proxy', true);
+  }
 
   // CORS
   app.enableCors({
